@@ -1,0 +1,261 @@
+<header>
+<%if current_user%>
+<div class="logo">
+<%= image_tag 'images.jpg' %>
+</div>
+<font color="#9f9f9f" size="7">
+<nav>
+
+<ul>
+<li>  <%=current_user.email%></li>
+
+<li>  <%= link_to "Sign Out",destroy_user_session_path,method: :delete ,data: {confirm:"Are you sure?"}%></li>
+
+</ul>
+</nav>
+</font>
+<%end%>
+</header>
+
+<% if current_user.role == 1%>
+<div class="box">
+	<table>
+		<tr>
+		<th>
+			Users requests
+		</th>
+		</tr>
+		<tr>
+		<th >
+			E-mail
+		</th>
+		<th>
+			Request Amt.
+		</th>
+		<th>
+			Request Status
+		</th>
+		<th>
+			Paid Amt.
+		</th>
+		<th>
+			Approve
+		</th>
+		</tr>
+		
+		<%cd = Creditdetail.all%>
+		<% cd.each do |f|%>
+			<tr>
+				<% user = User.find_by_id(f.user_id)%>
+				<td >
+					<%=user.email%>
+				</td>
+				<td>
+					<%=f.amount%>
+				</td>
+				<td>
+					<% if f.requestStatus%>
+						approved
+						<%else%>
+						pending
+						<%end%>
+				</td>
+				<td>
+					<%=f.repaidAmount%>
+				</td>
+				<td>
+					<%if !f.requestStatus%>
+						<form action="approval" method = post>
+						<input type="hidden" name="id" value="<%=f.id%>">
+						<input type="submit" value="approval">
+
+						</form>
+					<%end%>
+
+				</td>
+			</tr>
+			<br>
+
+
+		<%end%>
+
+	</table>
+</div>
+
+
+<%else%>
+
+<div class="box">
+
+<h3>BALANCE AMOUNT: <%=current_user.cl%></h3>
+<%@creditdetail = Creditdetail.new%>
+<br>
+<%= form_for @creditdetail do |f| %>
+
+	  <div class="field">
+	    <%= f.label :amount %><br>
+	    <%= f.number_field :amount ,:class => 'a1', required: true%>
+	  </div>
+	 
+	  
+	   
+	    <%= f.submit value:"Create Credentials" ,:class => 'button2'%>
+	 
+	<% end %><br>
+<B>Your requests</B>
+	<table>
+		
+		<tr>
+		<th>
+			Request Amt.
+		</th>
+		<th>
+			Request Status
+		</th>
+		<th>
+			Paid Amt.
+		</th>
+		<th>
+			Is Paid
+		</th>
+		<th>
+			Payment Option
+		</th>
+		</tr>
+		
+		<%cd = Creditdetail.where(user_id: current_user)%>
+		<% cd.each do |f|%>
+			<tr>
+				<% user = User.find_by_id(f.user_id)%>
+				<td>
+					<%=f.amount%>
+				</td>
+				<td>
+					<% if f.requestStatus%>
+						approved
+						<%else%>
+						pending
+						<%end%>
+				</td>
+				<td>
+					<%=f.repaidAmount%>
+				</td>
+				<td>
+					<%if f.isPaid%>
+						Yes
+					<%else%>
+						No
+					<%end%>
+				</td>
+				<td>
+				<%if !f.isPaid && !f.requestStatus%>
+					Not Approved
+
+				<%elsif !f.isPaid && f.requestStatus%>
+						<form action="payment" method = post>
+						<input type="hidden" name="id" value="<%=f.id%>">
+						<input type="submit" value="pay">
+						</form>
+
+				<%elsif f.isPaid && f.requestStatus%>
+					Transaction Completed
+
+
+				<%end%>
+					
+					
+				</td>
+			</tr>
+			<br>
+
+
+		<%end%>
+
+	</table>
+
+
+<%end%>
+</div>
+
+<style type="text/css">
+.button2 {
+
+    background-color: #dd929c;
+    border: 1px solid #bbcadc;
+    border-radius: 4px;
+    color: #0c0440;
+    margin: 4px 2px;
+    text-align: center;
+    text-decoration: none;
+    padding: 4px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 200px;
+    margin: 5px;
+}
+
+.button2:hover {background-color: #cb0001;color:white;}
+
+.a1{
+	 width: 50%;
+     height: 25px;
+     padding-left: 1%;
+ 	 margin-top: 2%;
+     border-radius:1%;
+     border: 2px solid grey;
+}
+
+
+.alldata{
+
+	margin-left: 10%;
+	padding-top: 8%;
+}
+.box{
+  position: absolute;
+  background-color: #fff;
+  border-radius: 4px;
+  margin-top: 12%;
+  padding-top: 2%;
+  padding-left: 2%; 
+  margin-left: 27.8%;
+  background-color:white;
+  box-shadow: 1px 1px 0 #f7f7f7;
+  border:2px solid #efefef ;
+  padding-bottom: 2%;
+  width: 40%;
+}
+th{
+	padding-left:8%;
+}
+td{
+	padding-left:10%;
+}
+table{
+	margin-top: -10%;
+	margin-left: 2%;
+}
+
+  body{
+
+    background-color: #cc0001;
+    color: #c10e0e;
+
+    
+  }
+  main{
+
+    display: flex;
+    
+    font-size: 15px;
+    flex-direction: column;
+    flex-align: center;
+    width:50%;
+    color: #cc0001;
+    height: auto;
+    background-color: white;
+
+  }
+
+</style>
+
